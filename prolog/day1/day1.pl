@@ -6,6 +6,7 @@
 
 % Before running, install list_util via :- pack_install(list_util).
 % You must have `day1.hidden` in your working directory.
+% run with `swipl day1.pl`
 
 % Input/Output IO
 
