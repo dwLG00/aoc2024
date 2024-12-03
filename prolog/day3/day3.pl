@@ -1,9 +1,11 @@
-:- module(day3, [read_file/2, match/2, do_dont_split/2, do_dont_split2/2, do_dont/2, concat/2, take_alternating/2]).
+:- module(day3, [read_file/2, match/2, do_dont_split/2, do_dont_split2/2, do_dont/2, concat/2, take_alternating/2, matchtest/2]).
 :- initialization(main, main).
 :- use_module(library(apply)).
 :- use_module(library(clpfd)).
 :- use_module(library(list_util)).
 :- use_module(library(pcre)).
+
+% IO and part 1
 
 read_file(File, Str) :-
     open(File, read, Stream),
@@ -27,8 +29,11 @@ match_unravel(Dict, A, B) :-
 % then run match/2 on that output ("day3.manual").
 % This method worked. However, it feels like it goes against the spirit
 % to use an external tool instead of writing the code myself.
-% I will most likely come back to this code and eventually get a working version that
-% gives me the correct answer.
+
+% Update as of 12/03/2024: I've figured out the bug.
+% It turns out that newlines were not being matched by .*
+% by default, and I needed to prepend my regex string
+% by "(?s)". Whoops
 
 concat([], "").
 concat([X], X).
@@ -41,13 +46,14 @@ take_alternating([X], [X]).
 take_alternating([X,_|Xs], [X," "|Ys]) :- take_alternating(Xs, Ys).
 
 do_dont(String, ElimString) :-
-    re_split("don't\\(\\)((?!do\\(\\)).)*do\\(\\)"/x, String, Splits, [greedy(true)]),
+    re_split("(?s)don't\\(\\)(.)*do\\(\\)"/x, String, Splits, [greedy(false)]),
     take_alternating(Splits, SplitsAlt),
     concat(SplitsAlt, ElimString).
 
-do_dont_split(String, String) :- re_replace("don't\\(\\)((?!do\\(\\)).)*do\\(\\)"/x, " ", String, String, [greedy(true)]).
+% Graveyard
+do_dont_split(String, String) :- re_replace("don't\\(\\).*do\\(\\)"/x, " ", String, String, [greedy(false)]).
 do_dont_split(String, ElimString) :-    
-    re_replace("don't\\(\\)((?!do\\(\\)).)*do\\(\\)"/x, " ", String, String2, [greedy(true)]),
+    re_replace("don't\\(\\).*do\\(\\)"/x, " ", String, String2, [greedy(false)]),
     do_dont_split(String2, ElimString).
 
 do_dont_split2(String, ElimString) :-
@@ -57,9 +63,13 @@ do_dont_split2(String, ElimString) :-
     ).
 
 
+% Main
+
 main :- 
     read_file("day3.hidden", S),
     match(S, N),
-    format("Mults: ~d\n", N).
-    %read_file("day2.hidden", N),
-    %format("Safe: ~d\n", N).
+    format("Mults: ~d\n", N),
+    read_file("day3.hidden", S2),
+    do_dont(S2, S3),
+    match(S3, N2),
+    format("Part 2 Mults: ~d\n", N2).
