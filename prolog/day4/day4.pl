@@ -1,4 +1,4 @@
-:- module(day4, [is_xmas/4, count_matches/2, get_column/3, columns/2, grid/2, count_matches_2d/2, into_grid/3, read_file/2, diagonals/2, test/2, count_xmas/2]).
+:- module(day4, [is_xmas/4, count_matches/2, get_column/3, columns/2, grid/2, count_matches_2d/2, into_grid/3, read_file/2, diagonals/2, count_xmas/2]).
 :- initialization(main, main).
 :- use_module(library(apply)).
 :- use_module(library(clpfd)).
@@ -25,8 +25,8 @@ into_grid(Stream, [Row|Grid], N) :-
 count_matches_2d([], 0).
 count_matches_2d([Row|Rows], N) :-
     count_matches(Row, N1),
-    count_matches_2d(Rows, N2),
-    N #= N1 + N2.
+    N #= N1 + N2,
+    count_matches_2d(Rows, N2).
 
 % From a 2d array Xs, construct a list of all rows, columns, and diagonals ("Grid")
 grid(Xs, Grid) :-
@@ -38,10 +38,10 @@ grid(Xs, Grid) :-
 % Compute diagonals of grid
 diagonals(Xs, Diags) :-
     length(Xs, Length),
-    stagger(Xs, Diags1, Length, Length),
+    stagger(Xs, Diags1, Length, Length), % construct top left to bottom right
     reverse(Xs, XRevs),
-    stagger(XRevs, Diags2, Length, Length),
-    columns(Diags1, Cols1),
+    stagger(XRevs, Diags2, Length, Length), % top right to bottom left
+    columns(Diags1, Cols1), % take the "diagonals"
     columns(Diags2, Cols2),
     append(Cols1, Cols2, Diags).
 
